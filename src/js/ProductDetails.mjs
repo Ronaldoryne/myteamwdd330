@@ -1,4 +1,4 @@
-import { getLocalStorage, setLocalStorage } from "./utils.mjs";
+import { getLocalStorage, setLocalStorage, updateCartCount } from "./utils.mjs";
 
 export default class ProductDetails {
   constructor(productId, dataSource) {
@@ -8,37 +8,50 @@ export default class ProductDetails {
   }
 
   async init() {
-    // Fetch product details
     this.product = await this.dataSource.findProductById(this.productId);
-
-    // Render product HTML
     this.renderProductDetails();
-
-    // Add listener for Add to Cart button
     document
       .getElementById("addToCart")
       .addEventListener("click", this.addProductToCart.bind(this));
   }
 
   addProductToCart() {
-    // 1. Load existing cart array from localStorage
-    let cart = getLocalStorage("so-cart") || [];
+    const cartItems = getLocalStorage("so-cart") || [];
+    
+    // Find if the item already exists in the cart
+    const existingItem = cartItems.find((item) => item.Id === this.product.Id);
 
-    // 2. Add the selected product to the array
-    cart.push(this.product);
-
-    // 3. Save updated array back to localStorage
-    setLocalStorage("so-cart", cart);
-
-    // Optional feedback message
-    alert(`${this.product.Name} added to cart!`);
+    if (existingItem) {
+      // If it exists, just increment its quantity
+      existingItem.quantity += 1;
+    } else {
+      // If it's a new item, add it to the cart with a quantity of 1
+      const newItem = { ...this.product, quantity: 1 };
+      cartItems.push(newItem);
+    }
+    
+    setLocalStorage("so-cart", cartItems);
+  
+    updateCartCount(); // Update cart count in header
   }
 
   renderProductDetails() {
-    // Populate product information into the HTML
-    document.getElementById("productName").textContent = this.product.Name;
-    document.getElementById("productPrice").textContent = `$${this.product.FinalPrice}`;
-    document.getElementById("productImage").src = this.product.Image;
-    document.getElementById("productDescription").textContent = this.product.Description;
+    productDetailsTemplate(this.product);
   }
+}
+
+function productDetailsTemplate(product) {
+  document.querySelector("h2").textContent = product.Brand.Name;
+  document.querySelector("h3").textContent = product.NameWithoutBrand;
+
+  const productImage = document.getElementById("productImage");
+  productImage.src = product.Image;
+  productImage.alt = product.NameWithoutBrand;
+
+  document.getElementById("productPrice").textContent = product.FinalPrice;
+  document.getElementById("productColor").textContent =
+    product.Colors[0].ColorName;
+  document.getElementById("productDesc").innerHTML = product.DescriptionHtmlSimple;
+
+  document.getElementById("addToCart").dataset.id = product.Id;
 }
