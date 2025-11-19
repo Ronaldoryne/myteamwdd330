@@ -1,4 +1,4 @@
-import { setLocalStorage } from './utils.mjs';
+import { getLocalStorage, setLocalStorage } from "./utils.mjs";
 
 export default class ProductDetails {
   constructor(productId, dataSource) {
@@ -11,27 +11,34 @@ export default class ProductDetails {
     // Fetch product details
     this.product = await this.dataSource.findProductById(this.productId);
 
-    // Render HTML
+    // Render product HTML
     this.renderProductDetails();
 
-    // Add listener to Add to Cart button
-    document.getElementById('addToCart')
-      .addEventListener('click', this.addProductToCart.bind(this));
+    // Add listener for Add to Cart button
+    document
+      .getElementById("addToCart")
+      .addEventListener("click", this.addProductToCart.bind(this));
   }
 
   addProductToCart() {
-    // Logic from your old product.js
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    // 1. Load existing cart array from localStorage
+    let cart = getLocalStorage("so-cart") || [];
+
+    // 2. Add the selected product to the array
     cart.push(this.product);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert(`${this.product.name} added to cart!`);
+
+    // 3. Save updated array back to localStorage
+    setLocalStorage("so-cart", cart);
+
+    // Optional feedback message
+    alert(`${this.product.Name} added to cart!`);
   }
 
   renderProductDetails() {
-    // Example: populate the page dynamically
-    document.getElementById('productName').textContent = this.product.name;
-    document.getElementById('productPrice').textContent = `$${this.product.price}`;
-    document.getElementById('productImage').src = this.product.image;
-    document.getElementById('productDescription').textContent = this.product.description;
+    // Populate product information into the HTML
+    document.getElementById("productName").textContent = this.product.Name;
+    document.getElementById("productPrice").textContent = `$${this.product.FinalPrice}`;
+    document.getElementById("productImage").src = this.product.Image;
+    document.getElementById("productDescription").textContent = this.product.Description;
   }
 }
