@@ -4,17 +4,18 @@ function renderCartContents() {
   const cartItems = getLocalStorage("so-cart") || [];
   const productList = document.querySelector(".product-list");
 
-  // If cart is empty, show nothing and hide footer
+  // Elements for footer and total
   const cartFooter = document.querySelector(".cart-footer");
   const totalElement = document.querySelector(".cart-total");
 
+  // If cart is empty
   if (!cartItems.length) {
     productList.innerHTML = "<p>Your cart is empty.</p>";
     cartFooter.classList.add("hide");
     return;
   }
 
-  // Render items
+  // Render each cart item
   const htmlItems = cartItems.map((item) => cartItemTemplate(item));
   productList.innerHTML = htmlItems.join("");
 
@@ -42,4 +43,5 @@ function cartItemTemplate(item) {
   `;
 }
 
+// Initialize cart rendering
 renderCartContents();
